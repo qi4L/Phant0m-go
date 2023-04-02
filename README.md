@@ -5,10 +5,6 @@ Svchost 在所谓的共享服务进程的实现中是必不可少的，其中多
 
 简而言之，这意味着；在 Windows 操作系统上，svchost.exe 管理服务，服务实际上作为线程在 svchost.exe 下运行。Phant0m 以事件日志服务为目标，找到负责事件日志服务的进程，检测并杀死负责事件日志服务的线程。因此，虽然事件日志服务似乎在系统中运行（因为 Phant0m 没有终止进程），但它实际上并没有运行（因为 Phant0m 终止了线程）并且系统不收集日志。
 
-# 工作原理
-
-![](https://gallery-1304405887.cos.ap-nanjing.myqcloud.com/markdownexecution-flow.png)
-
 # 检测事件日志服务
 
 获取事件日志服务有两个方法
