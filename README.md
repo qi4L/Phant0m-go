@@ -39,5 +39,5 @@ Svchost 在所谓的共享服务进程的实现中是必不可少的，其中多
 # 示例
 
 ```plan9_x86
-go run main.go -p1 -t2 1
+go run main.go -p1 -t1 1
 ```

@@ -20,6 +20,7 @@ const (
 	RPC_C_AUTHN_LEVEL_DEFAULT     = 0
 	RPC_C_IMP_LEVEL_IMPERSONATE   = 3
 	EOAC_NONE                     = 0
+	CLSCTX_INPROC_SERVER          = 0x1
 )
 
 var (
@@ -56,6 +57,7 @@ type SID_AND_ATTRIBUTES struct {
 type PTOKEN_MANDATORY_LABEL struct {
 	Label SID_AND_ATTRIBUTES
 }
+
 type PRIVILEGE_SET struct {
 	PrivilegeCount uint32
 	Control        uint32
@@ -65,6 +67,19 @@ type PRIVILEGE_SET struct {
 type LUID_AND_ATTRIBUTES struct {
 	Luid       windows.LUID
 	Attributes uint32
+}
+
+type IWbemLocator interface {
+	ConnectServer(
+		strNetworkResource string,
+		strUser string,
+		strPassword string,
+		strLocale string,
+		lSecurityFlags int32,
+		strAuthority string,
+		pCtx interface{},
+		ppNamespace interface{},
+	) error
 }
 
 func (c *WorkExp) enoughIntegrityLevel() bool {
