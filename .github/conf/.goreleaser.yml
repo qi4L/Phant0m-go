@@ -39,11 +39,8 @@ builds:
     env:
       - CGO_ENABLED=0
     goos:
-      - linux
       - windows
-      - darwin
     goarch:
-      - mips64
       - arm
     goarm:
       - "6"
