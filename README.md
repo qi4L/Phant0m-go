@@ -1,4 +1,3 @@
-![](https://socialify.git.ci/nu1r/GoLangPhant0m/image?font=Raleway&forks=1&issues=1&language=1&logo=https%3A%2F%2Fs1.ax1x.com%2F2022%2F09%2F12%2FvXqOUI.jpg&name=1&owner=1&pattern=Signal&pulls=1&stargazers=1&theme=Light)
 [Phant0m项目重构](https://github.com/hlldz/Phant0m)
 
 Svchost 在所谓的共享服务进程的实现中是必不可少的，其中多个服务可以共享一个进程以减少资源消耗。将多个服务分组到一个进程中可以节省计算资源，NT 设计者特别关注这一考虑，因为创建 Windows 进程比在其他操作系统（例如 Unix 系列）中花费更多的时间和消耗更多的内存。<sup>[1](https://en.wikipedia.org/wiki/Svchost.exe)</sup>
