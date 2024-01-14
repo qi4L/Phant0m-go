@@ -1,41 +1,41 @@
-[Phant0m项目重构](https://github.com/hlldz/Phant0m)
+![GoPhant0m](https://socialify.git.ci/qi4L/GoPhant0m/image?description=1&font=KoHo&forks=1&language=1&logo=https%3A%2F%2Fs11.ax1x.com%2F2024%2F01%2F14%2FpFP7Cmn.jpg&name=1&owner=1&pattern=Charlie%20Brown&stargazers=1&theme=Auto)
 
-Svchost 在所谓的共享服务进程的实现中是必不可少的，其中多个服务可以共享一个进程以减少资源消耗。将多个服务分组到一个进程中可以节省计算资源，NT 设计者特别关注这一考虑，因为创建 Windows 进程比在其他操作系统（例如 Unix 系列）中花费更多的时间和消耗更多的内存。<sup>[1](https://en.wikipedia.org/wiki/Svchost.exe)</sup>
+Svchost is essential in the implementation of so-called shared service processes, where multiple services can share a process to reduce resource consumption. Grouping multiple services into a single process saves computing resources, a consideration that was of particular concern to NT designers because creating Windows processes takes more time and consumes more memory than in other operating systems, such as the Unix family. <sup>[1](https://en.wikipedia.org/wiki/Svchost.exe)</sup>
 
-简而言之，这意味着；在 Windows 操作系统上，svchost.exe 管理服务，服务实际上作为线程在 svchost.exe 下运行。Phant0m 以事件日志服务为目标，找到负责事件日志服务的进程，检测并杀死负责事件日志服务的线程。因此，虽然事件日志服务似乎在系统中运行（因为 Phant0m 没有终止进程），但它实际上并没有运行（因为 Phant0m 终止了线程）并且系统不收集日志。
+In a nutshell, this means; on Windows operating systems, svchost.exe manages the service, and the service actually runs as a thread under svchost.exe. Phant0m targets the event log service, finds the process responsible for the event log service, detects and kills the thread responsible for the event log service. Therefore, although the event log service appears to be running on the system (because Phant0m did not terminate the process), it is not actually running (because Phant0m terminated the thread) and the system does not collect logs.
 
-# 检测事件日志服务
+# Detect event log service
 
-获取事件日志服务有两个方法
-1. 通过 SCM（服务控制管理器）检测
-2. 通过 WMI（Windows 管理规范）检测（待写）
+There are two methods to obtain the event log service
+1. Detect via SCM (Service Control Manager)
+2. Detection via WMI (Windows Management Instrumentation) (to be written)
 
-# 杀死线程
+# Kill thread
 
-## 方法一
+## method one
 
-当每项服务在运行 Windows Vista 或更高版本的计算机上注册时，服务控制管理器 (SCM) 会为该服务分配一个唯一的数字标记（按升序排列）。然后，在服务创建时，标签被分配给主服务线程的 TEB。然后，此标记将传播到主服务线程创建的每个线程。例如，如果 Foo 服务线程创建了一个 RPC 工作线程（注意：RPC 工作线程稍后不会更多地使用线程池机制），该线程将具有 Foo 服务的服务标签。2个
+When each service is registered on a computer running Windows Vista or later, the Service Control Manager (SCM) assigns the service a unique numerical tag (in ascending order). Then, at service creation time, the label is assigned to the TEB of the main service thread. This tag will then be propagated to every thread created by the main service thread. For example, if the Foo service thread creates an RPC worker thread (note: RPC worker threads will not make more use of the thread pool mechanism later), that thread will have the service label of the Foo service. 2
 
-因此，在此技术中，Phant0m 将使用 NtQueryInformationThread API 检测事件日志服务的线程，以获取线程的 TEB 地址并从 TEB 中读取 SubProcessTag。然后它会终止与事件日志服务相关的线程。
+So, in this technique, Phant0m will detect the event log service's thread using the NtQueryInformationThread API to get the thread's TEB address and read the SubProcessTag from the TEB. It then terminates the thread related to the event log service.
 
-## 方法二
+## Method Two
 
-在这种技术中，Phant0m 检测与线程关联的 DLL 的名称。Windows 事件日志服务使用wevtsvc.dll. 完整路径是%WinDir%\System32\wevtsvc.dll. 如果线程正在使用该 DLL，则它是 Windows 事件日志服务的线程，然后 Phant0m 会终止该线程。
+In this technique, Phant0m detects the name of the DLL associated with the thread. The Windows Event Log Service uses wevtsvc.dll. The full path is %WinDir%\System32\wevtsvc.dll. If a thread is using that DLL, then it is a Windows Event Log Service thread, and then Phant0m terminates that thread.
 
-# 用法
+# Usage
 
 ```text
 -p1 PID_1
-      从服务管理器中获取事件日志服务的PID
-  -p2 PID_2
-      从WMI中获取事件日志服务的PID
-  -t1 Technique_1
-      使用方法1
-  -t2 Technique_2
-      使用方法2
+       Get the PID of the event log service from the service manager
+   -p2 PID_2
+       Get the PID of the event log service from WMI
+   -t1 Technique_1
+       How to use 1
+   -t2 Technique_2
+       How to use 2
 ```
 
-# 示例
+# Example
 
 ```plan9_x86
 go run main.go -p1 -t1 1
